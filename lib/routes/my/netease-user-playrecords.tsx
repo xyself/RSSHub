@@ -1,5 +1,5 @@
 import { renderToString } from 'hono/jsx/dom/server';
-import axios from 'axios';
+import got from '@/utils/got';
 import crypto from 'crypto';
 
 import { config } from '@/config';
@@ -20,16 +20,8 @@ const aesRsaEncrypt = (text: string) => ({
 
 // ===== 请求 =====
 async function fetchPlayRecord(uid: string, type: number, cookie?: string) {
-    const { data } = await axios.post(
+    const { data } = await got.post(
         'https://music.163.com/weapi/v1/play/record?csrf_token=',
-        new URLSearchParams(
-            aesRsaEncrypt(
-                JSON.stringify({
-                    uid,
-                    type,
-                })
-            )
-        ).toString(),
         {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -37,6 +29,14 @@ async function fetchPlayRecord(uid: string, type: number, cookie?: string) {
                 'User-Agent': 'Mozilla/5.0',
                 ...(cookie && { Cookie: cookie }),
             },
+            body: new URLSearchParams(
+                aesRsaEncrypt(
+                    JSON.stringify({
+                        uid,
+                        type,
+                    })
+                )
+            ).toString(),
         }
     );
 
